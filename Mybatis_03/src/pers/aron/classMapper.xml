@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.aron.classMapper">
+
+	<!-- 根据班级 id 查询班级信息(带老师的信息) -->
+	
+	<!-- 方式一、嵌套结果 -->
+	<select id="getClass" parameterType="int" resultMap="getClassMap">
+		select * from class c left join teacher t on c.teacher_id=t.t_id where c.c_id = #{id};
+	</select>
+	<resultMap type="Classes" id="getClassMap">
+		<id property="id" column="c_id"/>
+		<result property="name" column="c_name"/>
+		<association property="teacher" javaType="Teacher" column="teacher_id">
+			<id property="id" column="t_id"/>
+			<result property="name" column="t_name"/>
+		</association>
+	</resultMap>
+	
+	<!-- 方式二、嵌套查询 -->
+	<select id="getClass2" parameterType="int" resultMap="getClass2Map">
+		select * from class where c_id = #{id}
+	</select>
+	<select id="getTeacher" parameterType="int" resultType="Teacher">
+		select t_id id,t_name name from teacher where t_id=#{id}
+	</select>
+	
+	<resultMap type="Classes" id="getClass2Map">
+		<id property="id" column="c_id"/>
+		<result property="name" column="c_name"/>
+	<association property="teacher" select="getTeacher" column="teacher_id">
+	</association>
+	</resultMap>
+	
+</mapper>

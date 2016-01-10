@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pers.aron.classMapper">
+
+<!-- 根据 classId 查询对应的班级信息,包括学生,老师 -->
+
+<!-- 嵌套结果 -->
+	<select id="getClass" parameterType="int" resultMap="getClassMap">
+		select * from class c left join student s on c.c_id = s.class_id left join teacher t on  c.c_id = t.t_id  where c.c_id = #{id} 
+	</select>
+	
+	<resultMap type="Classes" id="getClassMap">
+		<id property="id" column="c_id"/>
+		<result property="name" column="c_name"/>
+		<association property="teacher" javaType="Teacher">
+			<id property="id" column="t_id"/>
+			<result property="name" column="t_name"/>
+		</association>
+		<collection property="student" ofType="Student">
+			<id property="id" column="s_id"/>
+			<result property="name" column="s_name"/>
+		</collection>
+	</resultMap>
+	
+	<!-- 嵌套查询 -->
+	<select id="getClass2" resultMap="getClass2Map">
+		select * from class where c_id = #{id}
+	</select>
+	<select id="getTeacher" parameterType="int" resultType="Teacher">
+		select t_id id,t_name name from teacher where t_id=#{id}
+	</select>
+	<select id="getStudent" resultType="Student">
+		select s_id id,s_name name from student where class_id=#{id}
+	</select>
+	<resultMap type="Classes" id="getClass2Map">
+		<id property="id" column="c_id"/>
+		<result property="name" column="c_name"/>
+		<association property="teacher" select="getTeacher" column="teacher_id">
+		</association>
+		<collection property="student" select="getStudent" column="c_id">
+		</collection>
+	</resultMap>
+</mapper>
